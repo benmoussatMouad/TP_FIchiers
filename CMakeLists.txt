@@ -3,4 +3,4 @@ project(TP_Fichiers)
 
 set(CMAKE_C_STANDARD  11)
 
-add_executable(TP_Fichiers main.c machineAbstraite.h)
+add_executable(TP_Fichiers main.c machineAbstraite.h machineAbstraite.c)
