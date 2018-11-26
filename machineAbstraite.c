@@ -27,21 +27,21 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
     else
         return 1;
 }
-
+//-------------------------------------------------
 void Fermer (FICHIER f) {
     fclose(f.file);
 }
-
+//-------------------------------------------------
 void LireDir (FICHIER f, int i, BLOC buf) {
     fseek(f.file, i* sizeof(BLOC), SEEK_SET);
-    fread(&buf,TAILLE_BLOC, 1, f.file);
+    fread(&buf,999, 1, f.file);
 }
-
+//-------------------------------------------------
 void EcrireDir (FICHIER f, int i, BLOC buf) {
     fseek(f.file, i * sizeof(BLOC), SEEK_SET);
-    fwrite(&buf, TAILLE_BLOC, 1, f.file);
+    fwrite(&buf, 999, 1, f.file);
 }
-
+//-------------------------------------------------
 int Entete (FICHIER f, int i) {
     switch (i) {
         case 0:
@@ -56,17 +56,17 @@ int Entete (FICHIER f, int i) {
             return -1;
     }
 }
-
+//-------------------------------------------------
 void LireSeq (FICHIER f, BLOC buf) {
     LireDir(f, f.blocCourrent, buf);
     f.blocCourrent++;
 }
-
+//-------------------------------------------------
 void EcrireSeq (FICHIER f, BLOC buf) {
     EcrireDir(f, f.blocCourrent, buf);
     f.blocCourrent++;
 }
-
+//-------------------------------------------------
 void Aff_Entete (FICHIER f, int i, int val) {
     switch (i) {
         case 0:
@@ -85,6 +85,7 @@ void Aff_Entete (FICHIER f, int i, int val) {
             break;
     }
 }
+//-------------------------------------------------
 
 
 

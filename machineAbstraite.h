@@ -7,14 +7,13 @@
 
 #define TAILLE_BLOC 999;
 
-//***********Declaration des types**
+//***********Declaration des types*********
 
 typedef struct Bloc {
-    char* info;
+    char taille[3];
     char efface;
     char cle[4];
-    char chevauch;//indique la taille du chevauchement de l'article precedent dans le bloc
-    //si egal à 0 alors pas de chevauchement
+    char info[991]; //taille du bloc moins les premiers champs
 } BLOC;
 
 typedef struct fichier {
@@ -46,6 +45,11 @@ void LireSeq(FICHIER f, BLOC buf);
 void EcrireSeq(FICHIER f, BLOC buf);
 //-------------------------------------------------
 void Aff_Entete (FICHIER, int, int);
+//--------------------------------------------
 
+
+//*****************Modules***************
+
+void Recherche(int* trouv,int* adrBloc, int* adrPos);
 
 #endif //TP_FICHIERS_MACHINEABSTRAITE_H
