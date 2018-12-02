@@ -34,12 +34,12 @@ void Fermer (FICHIER f) {
 //-------------------------------------------------
 void LireDir (FICHIER f, int i, BLOC buf) {
     fseek(f.file, i* sizeof(BLOC), SEEK_SET);
-    fread(&buf,999, 1, f.file);
+    fread(&buf, TAILLE_BLOC, 1, f.file);
 }
 //-------------------------------------------------
 void EcrireDir (FICHIER f, int i, BLOC buf) {
     fseek(f.file, i * sizeof(BLOC), SEEK_SET);
-    fwrite(&buf, 999, 1, f.file);
+    fwrite(&buf, TAILLE_BLOC, 1, f.file);
 }
 //-------------------------------------------------
 int Entete (FICHIER f, int i) {
@@ -84,6 +84,46 @@ void Aff_Entete (FICHIER f, int i, int val) {
         default:
             break;
     }
+}
+
+void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
+    int Bi, Bs, milieu;
+    int blocTrouv = 0;
+    BLOC buf;
+
+    //Recherche Dicothomique sur les blocs
+    Bi = 1;
+    Bs = Entete(f, 0);
+    while (Bi <= Bs && !blocTrouv) {
+
+        milieu = (Bi + Bs) / 2;
+        LireDir(f, milieu, buf);
+
+        if ( cle <= buf.max ) {
+            LireDir(f, milieu - 1, buf);
+
+            if ( cle > buf.max ) { //la valeur se trouv dans le bloc mileu
+                adrBloc = milieu;
+                blocTrouv = 1;
+            } else
+                Bs = milieu - 1;
+        } else {
+            Bi = milieu + 1;
+            if ( Bi > Entete(f, 0)) {
+                adrBloc = Entete(f, 0) + 1; //pour faciliter l'insertion aucas ou la valeur depasse la plus grande valeur
+            }
+        }
+    }
+    //*********************************
+    //Recherche sequentiel dans le bloc
+    LireDir(f, adrBloc, buf);
+
+    int j = atoi(buf.chevauch); //on commence le parcours depuis la fin du chevauchement,
+    trouv = 0;
+    //todo: completer la recherche sequentiel
+
+
+
 }
 //-------------------------------------------------
 

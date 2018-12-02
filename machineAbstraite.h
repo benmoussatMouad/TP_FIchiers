@@ -4,16 +4,17 @@
 //***********
 #include "stdio.h"
 #include "string.h"
+#include "stdlib.h"
 
-#define TAILLE_BLOC 999;
+
+#define TAILLE_BLOC 999
 
 //***********Declaration des types*********
 
 typedef struct Bloc {
-    char taille[3];
-    char efface;
-    char cle[4];
-    char info[991]; //taille du bloc moins les premiers champs
+    char max;
+    char chevauch[3]; //Indique le nombre de caractère en chevauchement dans le bloc, si egal à 0 pas de chevauchement
+    char Tab[TAILLE_BLOC];
 } BLOC;
 
 typedef struct fichier {
@@ -50,6 +51,8 @@ void Aff_Entete (FICHIER, int, int);
 
 //*****************Modules***************
 
-void Recherche(int* trouv,int* adrBloc, int* adrPos);
+void Recherche(FICHIER f, char cle[4], int* trouv, int* adrBloc, int* Pos);
+void Inserer(FICHIER f, char cle[4]);
+void Supprimer(FICHIER f, char cle[4]);
 
 #endif //TP_FICHIERS_MACHINEABSTRAITE_H
