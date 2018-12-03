@@ -8,11 +8,13 @@
 
 
 #define TAILLE_BLOC 999
+#define VRAI 1
+#define FAUX 0
 
 //***********Declaration des types*********
 
 typedef struct Bloc {
-    char max;
+    int cleMax;
     char chevauch[3]; //Indique le nombre de caractère en chevauchement dans le bloc, si egal à 0 pas de chevauchement
     char Tab[TAILLE_BLOC];
 } BLOC;

@@ -90,6 +90,8 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
     int Bi, Bs, milieu;
     int blocTrouv = 0;
     BLOC buf;
+    int cleC;
+    cleC = atoi(cle);
 
     //Recherche Dicothomique sur les blocs
     Bi = 1;
@@ -99,30 +101,66 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
         milieu = (Bi + Bs) / 2;
         LireDir(f, milieu, buf);
 
-        if ( cle <= buf.max ) {
+        if ( cleC <= buf.cleMax ) {
             LireDir(f, milieu - 1, buf);
 
-            if ( cle > buf.max ) { //la valeur se trouv dans le bloc mileu
-                adrBloc = milieu;
+            if ( cleC > buf.cleMax ) { //la valeur se trouv dans le bloc mileu
+                *adrBloc = milieu;
                 blocTrouv = 1;
             } else
                 Bs = milieu - 1;
         } else {
             Bi = milieu + 1;
             if ( Bi > Entete(f, 0)) {
-                adrBloc = Entete(f, 0) + 1; //pour faciliter l'insertion aucas ou la valeur depasse la plus grande valeur
+                *adrBloc = Entete(f, 0) + 1; //pour faciliter l'insertion aucas ou la valeur depasse la plus grande valeur
             }
         }
     }
+
     //*********************************
-    //Recherche sequentiel dans le bloc
-    LireDir(f, adrBloc, buf);
+    //Recherche SEQUENTIEL dans le bloc trouve
+    //*********************************
+    LireDir(f, *adrBloc, buf);
 
     int j = atoi(buf.chevauch); //on commence le parcours depuis la fin du chevauchement,
-    trouv = 0;
-    //todo: completer la recherche sequentiel
+    *trouv = FAUX;
+    int finBloc = FAUX;
 
+    char taille[4]; //variable utilise pour sauver la taille courrente
+    int tailleCour; //conversion en entier de la taille
+    char eff;       //Pour le champ efface
+    char cleCour[5];//utilise pour sauver la cle courrente
 
+    while (!*trouv && !finBloc) {
+        if ((j + 3 + 1 + 4) <= TAILLE_BLOC - 1 ) { //si l'article courrent n'est pas en chevauchement
+
+            memcpy(taille, &buf.Tab[j], 3); //Extraie une sous chaine allant de j a j+3 (la taille)
+            taille[3] = '\0';
+
+            tailleCour = atoi(taille);
+            eff = buf.Tab[j + 3];
+            memcpy(cle, &buf.Tab[j + 4], 4);
+            cleCour[4] = '\0';
+            cleC = atoi(cleCour);
+
+            if ( strcmp(cleCour, cle) == 0 ) { // si les cle sont identique alors
+                *trouv = VRAI;
+                *Pos = j;
+            } else {
+                if ( cle > cleC || cleC == buf.cleMax) {
+                    finBloc = VRAI;
+                    *Pos = j; //la position ou il faut inserer
+                } else {
+                    j += tailleCour;
+                }
+            }
+        } else {
+            cleC = atoi(cle);
+            *trouv = (cleC == buf.cleMax); //on est certain que la cle qui est en chevauchement
+            // est la derniere cle qui est aussi le max du bloc
+        }
+
+    }
 
 }
 //-------------------------------------------------
