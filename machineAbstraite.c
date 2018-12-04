@@ -6,8 +6,10 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
     //Retourne 0 si il n'y a pas d'erreur
     // Retourne une valeur diff de 0 sinon
 
+    char* chemin = strcat(nomFichier, "./");
+
     if ( mode == 'a' ) {
-        f.file = fopen(nomFichier, "r+");
+        f.file = fopen(chemin, "r+");
         f.entete.carInseres = 0;
         f.entete.carSupprimes = 0;
         f.entete.nbArticles = 0;
@@ -16,7 +18,7 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
         return 0;
     }
     else if( mode == 'n') {
-        f.file = fopen(nomFichier, "w");
+        f.file = fopen(chemin, "w");
         f.entete.carInseres = 0;
         f.entete.carSupprimes = 0;
         f.entete.nbArticles = 0;
@@ -90,21 +92,27 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
     int Bi, Bs, milieu;
     int blocTrouv = 0;
     BLOC buf;
-    int cleC;
-    cleC = atoi(cle);
+    int cleCherche;
+    int nbAccesMS = 0;
 
+    //*************************************
     //Recherche Dicothomique sur les blocs
+    //*************************************
+    cleCherche = atoi(cle); //on convertie la cle en un entier
     Bi = 1;
     Bs = Entete(f, 0);
+
     while (Bi <= Bs && !blocTrouv) {
 
         milieu = (Bi + Bs) / 2;
         LireDir(f, milieu, buf);
+        nbAccesMS++;
 
-        if ( cleC <= buf.cleMax ) {
+        if ( cleCherche <= buf.cleMax ) {
             LireDir(f, milieu - 1, buf);
+            nbAccesMS++;
 
-            if ( cleC > buf.cleMax ) { //la valeur se trouv dans le bloc mileu
+            if ( cleCherche > buf.cleMax ) { //la valeur se trouve dans le bloc mileu
                 *adrBloc = milieu;
                 blocTrouv = 1;
             } else
@@ -118,9 +126,10 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
     }
 
     //*********************************
-    //Recherche SEQUENTIEL dans le bloc trouve
+    //Recherche SEQUENTIEL dans le bloc trouvé
     //*********************************
     LireDir(f, *adrBloc, buf);
+    nbAccesMS++;
 
     int j = atoi(buf.chevauch); //on commence le parcours depuis la fin du chevauchement,
     *trouv = FAUX;
@@ -130,6 +139,7 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
     int tailleCour; //conversion en entier de la taille
     char eff;       //Pour le champ efface
     char cleCour[5];//utilise pour sauver la cle courrente
+    int cleC;       //Conversion de la cle courrente en entier
 
     while (!*trouv && !finBloc) {
         if ((j + 3 + 1 + 4) <= TAILLE_BLOC - 1 ) { //si l'article courrent n'est pas en chevauchement
@@ -137,9 +147,10 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
             memcpy(taille, &buf.Tab[j], 3); //Extraie une sous chaine allant de j a j+3 (la taille)
             taille[3] = '\0';
 
-            tailleCour = atoi(taille);
+            tailleCour = atoi(taille);      //conversion de taille
             eff = buf.Tab[j + 3];
-            memcpy(cle, &buf.Tab[j + 4], 4);
+
+            memcpy(cleCour, &buf.Tab[j + 4], 4); //extraction de la cle
             cleCour[4] = '\0';
             cleC = atoi(cleCour);
 
@@ -147,21 +158,22 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
                 *trouv = VRAI;
                 *Pos = j;
             } else {
-                if ( cle > cleC || cleC == buf.cleMax) {
+                if ( cleCherche > cleC || cleC == buf.cleMax) {
                     finBloc = VRAI;
                     *Pos = j; //la position ou il faut inserer
                 } else {
                     j += tailleCour;
                 }
             }
-        } else {
-            cleC = atoi(cle);
-            *trouv = (cleC == buf.cleMax); //on est certain que la cle qui est en chevauchement
+        } else { //si l'article courrent est en chevauchement
+            *trouv = (cleCherche == buf.cleMax); //on est certain que la cle qui est en chevauchement
             // est la derniere cle qui est aussi le max du bloc
+            // donc si on arrive au dernier element chevauché alors c'est le max
         }
 
     }
-
+    //****Affichage du nombre d'acces au disque
+    printf("Il y a eu %d acces au disque.\n", &nbAccesMS);
 }
 //-------------------------------------------------
 
