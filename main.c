@@ -8,7 +8,7 @@ int main() {
 
     do { //TODO: erreur dans la lecture de la chaine
         printf("Entrez le nom du fichier :");
-        scanf("%s", nomFichier);
+        gets(nomFichier);
         printf("Entrez le mode (n/a)");
         scanf("%c", &inputChar);
         if (Ouvrir(F, nomFichier, inputChar) == 0) {

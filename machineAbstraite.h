@@ -1,13 +1,17 @@
 
 #ifndef TP_FICHIERS_MACHINEABSTRAITE_H
 #define TP_FICHIERS_MACHINEABSTRAITE_H
-//***********
+//***********Inclusion des bibliotheques standards**************
 #include "stdio.h"
 #include "string.h"
 #include "stdlib.h"
 
 
 #define TAILLE_BLOC 999
+#define TAILLE_TAILLE 4
+#define TAILLE_CLE 3
+#define TAILLE_EFF 1
+//Valeurs logiques:
 #define VRAI 1
 #define FAUX 0
 
@@ -19,7 +23,7 @@ typedef struct Bloc {
     char Tab[TAILLE_BLOC];
 } BLOC;
 
-typedef struct fichier {
+typedef struct fichier  {
     struct Tentete {
         int nbBlocs;
         int nbArticles;
@@ -28,7 +32,7 @@ typedef struct fichier {
     } entete;
     int blocCourrent;
     FILE* file;
-} FICHIER;
+} * FICHIER;
 
 
 //***********Procedures du Modele*******
