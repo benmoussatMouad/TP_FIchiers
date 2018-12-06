@@ -6,7 +6,10 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
     //Retourne 0 si il n'y a pas d'erreur
     // Retourne une valeur diff de 0 sinon
 
-    char* chemin = strcat("./", nomFichier);
+
+    char chemin[80];
+    strcpy(chemin, "./");
+    strcat(chemin, nomFichier);
 
     if ( mode == 'a' ) {
         (*f).file = fopen(chemin, "r+");
@@ -19,7 +22,7 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
         return 0;
     }
     else if( mode == 'n') {
-        f->file = fopen(chemin, "w");
+        f->file = fopen("./test", "w");
         perror("fopen");
         f->entete.carInseres = 0;
         f->entete.carSupprimes = 0;
