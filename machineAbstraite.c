@@ -222,13 +222,13 @@ void creationArticle(char * cle, char info[990], char taille[3], char efface, ch
 }
 //-------------------------------------------------
 
-void insretion(FICHIER F, char * cle)
+void Insertion (FICHIER F, char *cle)
 {
     int i, j, trouv, n;
     char Info[990];
     char Article[998];
     char taille[3];
-    BLOC buf;
+    BLOC buf = malloc(sizeof(BLOC));
 
     printf("Donner l'info: ");
     scanf("%s", Info);
@@ -238,30 +238,30 @@ void insretion(FICHIER F, char * cle)
     if (trouv){
         printf("\n La cle existe deja!\n");
         LireDir(F,i,buf);
-        buf.Tab[j+3]='0';
+        buf->Tab[j+3]='0';
         EcrireDir(F,i,buf);
     } else{
         if (i==0 && j==0 ){
-            strcpy(buf.Tab, Article);
-            buf.cleMax=atoi(cle);
-            itoa(0, buf.chevauch, 10);
+            strcpy(buf->Tab, Article);
+            buf->cleMax=atoi(cle);
+            itoa(0, buf->chevauch, 10);
             Aff_Entete(F,0,1);
             Aff_Entete(F, 1, 1);
             Aff_Entete(F, 2, atoi(taille));
             EcrireDir(F,i,buf);
         }else{
             if (i==Entete(F,0)+1){
-                strcpy(buf.Tab, Article);
-                buf.cleMax = atoi(cle);
+                strcpy(buf->Tab, Article);
+                buf->cleMax = atoi(cle);
                 Aff_Entete(F,0,Entete(F,0)+1);
                 Aff_Entete(F, 1, Entete(F,2)+1);
                 Aff_Entete(F, 2, Entete(F,2)+atoi(taille));
-                itoa(0,buf.chevauch,10);
+                itoa(0,buf->chevauch,10);
                 EcrireDir(F,i,buf);
             }else{
                 if (i==Entete(F,0) && j==Entete(F,3)%1000+1){
                     LireDir(F,i,buf);
-                    buf.cleMax=atoi(cle);
+                    buf->cleMax=atoi(cle);
                     Aff_Entete(F, 1, Entete(F,2)+1);
                     Aff_Entete(F, 2, Entete(F,2)+atoi(taille));
                     for (int k = 0; k < atoi(taille) ; ++k) {
@@ -270,15 +270,15 @@ void insretion(FICHIER F, char * cle)
                             i++;
                             Aff_Entete(F,0,Entete(F,0)+1);
                             LireDir(F,i,buf);
-                            itoa(atoi(taille)-k-1,buf.chevauch,10);
+                            itoa(atoi(taille)-k-1,buf->chevauch,10);
                             j=0;
                         }
-                        buf.Tab[0]=Article[k];
+                        buf->Tab[0]=Article[k];
                         j++;
                     }
                     EcrireDir(F,i,buf);
-                }else{
-
+                } else{
+                    //TODO: Insertion au milieu
                 }
             }
         }
@@ -288,23 +288,23 @@ void insretion(FICHIER F, char * cle)
 
 void Suppression(FICHIER f,char * cle){
     int i,j,trouv;
-    BLOC buf;
+    BLOC buf = malloc(sizeof(BLOC));
     char taille[3];
 
     Recherche(f,cle,&trouv,&i,&j);
     if (trouv == VRAI){
-        LireDir(f,i,buf);
-        for (int k = 0; k <3 ; ++k) {
-            taille[k]=buf.Tab[j];
-            if ( j == 998){
-                j=0;
-                EcrireDir(f,i,buf);
-                LireDir(f,i+1,buf);
+        LireDir(f, i, buf);
+        for (int k = 0; k < 3; ++k) {
+            taille[k] = buf->Tab[j];
+            if ( j == 998 ) {
+                j = 0;
+                EcrireDir(f, i, buf);
+                LireDir(f, i + 1, buf);
             }
             j++;
         }
         Aff_Entete(f,3,Entete(f,3)+atoi(taille));
-        buf.Tab[j]='1';
+        buf->Tab[j]='1';
         EcrireDir(f,i+1,buf);
     }
 }

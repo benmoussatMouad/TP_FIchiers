@@ -5,10 +5,13 @@
 int main() {
     char nomFichier[40];
     char inputChar;
+    int inpuInt;
     int erreur = 1;
 
     FICHIER F = malloc(sizeof(FICHIER)); //allouer un espace memoire suffisant
 
+
+    printf("%d", TAILLE_ENTETE);
     do {
         printf("Entrez le nom du fichier :");
         gets(nomFichier);
@@ -43,22 +46,45 @@ int main() {
         scanf("%c", &inputChar);
 
         //*********************************************
+        char cle[5]; //Sert pour la lecture en entree
         switch (inputChar) {
-            case '1':
+            case '1': //Recherche
                 CLEAR;
                 puts("Entrez la cle à chercher: ");
-                char cle[5];
                 fflush(stdin);
                 gets(cle);
                 int trouv, bloc, pos;
                 Recherche(F, cle, &trouv, &bloc, &pos);
-                if (trouv)
+                if (trouv) {
                     printf("La donne se trouve dans le bloc %d a la position %d\n.", bloc, pos);
-                else
+                }
+                else {
                     printf("La donne n'est pas trouve.\n");
+                }
+                break;
+
+            case '2':
+                CLEAR;
+                puts("Entrez la cle de la donne a inserer (4 car) : ");
+                fflush(stdin);
+                gets(cle);
+                Insertion(F, cle);
+                break;
+            case '5':
+                CLEAR;
+                puts("Entrez le nombre du bloc à afficher :");
+                scanf("%d", &inpuInt);
+                BLOC buf = malloc(sizeof(BLOC));
+                LireDir(F, inpuInt, buf);
+                fwrite(buf, TAILLE_BLOC, 1, stdout);
+                break;
+
+            case '4':   //Afficher Entete
+                AffichEntete(F);
                 break;
             default:
-                return 0;
+                quit = 1;
+                break;
         }
     }
     return 0;

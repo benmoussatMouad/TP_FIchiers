@@ -59,7 +59,10 @@ void Aff_Entete (FICHIER, int, int);
 //*****************Modules***************
 
 void Recherche(FICHIER f, char cle[4], int* trouv, int* adrBloc, int* Pos);
-void Inserer(FICHIER f, char cle[4]);
-void Supprimer(FICHIER f, char cle[4]);
+void Insertion (FICHIER F, char *cle);
+void Suppression(FICHIER f,char * cle);
+void AffichEntete(FICHIER f);
+void creationArticle(char * cle, char info[990], char taille[3], char efface, char Article[998]);
+
 
 #endif //TP_FICHIERS_MACHINEABSTRAITE_H
