@@ -14,11 +14,12 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
     if ( mode == 'a' ) {
         (*f).file = fopen(chemin, "r+");
         perror("fopen");
-        f->entete.carInseres = 0;
-        f->entete.carSupprimes = 0;
-        f->entete.nbArticles = 0;
-        f->entete.nbBlocs = 0;
-        f->blocCourrent = 0;
+        //f->entete.carInseres = 0;
+        //f->entete.carSupprimes = 0;
+        //f->entete.nbArticles = 0;
+        //f->entete.nbBlocs = 0;
+        //f->blocCourrent = 0;
+        fread(&f->entete, TAILLE_ENTETE, 1, f->file);
         return 0;
     }
     else if( mode == 'n') {
@@ -29,6 +30,7 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
         f->entete.nbArticles = 0;
         f->entete.nbBlocs = 0;
         f->blocCourrent = 0;
+        fwrite(&f->entete, TAILLE_ENTETE, 1, f->file);
         return 0;
     }
     else
@@ -40,13 +42,15 @@ void Fermer (FICHIER f) {
 }
 //-------------------------------------------------
 void LireDir (FICHIER f, int i, BLOC buf) {
-    fseek(f->file, i* sizeof(BLOC), SEEK_SET);
-    fread(&buf, TAILLE_BLOC, 1, f->file);
+    fseek(f->file, i* sizeof(BLOC) + TAILLE_ENTETE, SEEK_SET);
+    fread(buf, TAILLE_BLOC, 1, f->file);
+    f->blocCourrent = i;
 }
 //-------------------------------------------------
 void EcrireDir (FICHIER f, int i, BLOC buf) {
-    fseek(f->file, i * sizeof(BLOC), SEEK_SET);
-    fwrite(&buf, TAILLE_BLOC, 1, f->file);
+    fseek(f->file, i * sizeof(BLOC) + TAILLE_ENTETE, SEEK_SET);
+    fwrite(buf, TAILLE_BLOC, 1, f->file);
+    f->blocCourrent = i;
 }
 //-------------------------------------------------
 int Entete (FICHIER f, int i) {
@@ -96,12 +100,14 @@ void Aff_Entete (FICHIER f, int i, int val) {
 void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
     int Bi, Bs, milieu;
     int blocTrouv = 0;
-    BLOC buf;
     int cleCherche;
     int nbAccesMS = 0;
     int nonSequentiel = FAUX;
 
-    if ( Entete(f, 1) == 0) {
+    BLOC buf = malloc(sizeof(BLOC));
+
+
+    if ( Entete(f, 1) != 0) {
         //*************************************
         //Recherche Dicothomique sur les blocs
         //*************************************
@@ -115,11 +121,11 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
             LireDir(f, milieu, buf);
             nbAccesMS++;
 
-            if ( cleCherche <= buf.cleMax ) {
+            if ( cleCherche <= buf->cleMax ) {
                 LireDir(f, milieu - 1, buf);
                 nbAccesMS++;
 
-                if ( cleCherche > buf.cleMax ) { //la valeur se trouve dans le bloc mileu
+                if ( cleCherche > buf->cleMax ) { //la valeur se trouve dans le bloc mileu
                     *adrBloc = milieu;
                     blocTrouv = 1;
                 } else {
@@ -149,7 +155,7 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
             LireDir(f, *adrBloc, buf);
             nbAccesMS++;
 
-            int j = atoi(buf.chevauch); //on commence le parcours depuis la fin du chevauchement,
+            int j = atoi(buf->chevauch); //on commence le parcours depuis la fin du chevauchement,
             *trouv = FAUX;
             int finBloc = FAUX; //designe la fin du bloc
 
@@ -162,12 +168,12 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
                 if ((j + TAILLE_TAILLE + TAILLE_EFF + TAILLE_CLE) <= TAILLE_BLOC - 1 ) {
                     //si l'article courrent n'est pas en chevauchement
 
-                    memcpy(taille, &buf.Tab[j], 3); //Extraie une sous chaine allant de j a j+3 (la taille)
+                    memcpy(taille, &buf->Tab[j], 3); //Extraie une sous chaine allant de j a j+3 (la taille)
                     taille[3] = '\0';
 
                     tailleCour = atoi(taille);      //conversion de taille
 
-                    memcpy(cleCour, &buf.Tab[j + 4], 4); //extraction de la cle
+                    memcpy(cleCour, &buf->Tab[j + 4], 4); //extraction de la cle
                     cleCour[4] = '\0';
                     cleC = atoi(cleCour);
 
@@ -175,7 +181,7 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
                         *trouv = VRAI;
                         *Pos = j;
                     } else {
-                        if ( cleCherche > cleC || cleC == buf.cleMax) {
+                        if ( cleCherche > cleC || cleC == buf->cleMax) {
                             finBloc = VRAI;
                             *Pos = j; //la position ou il faut inserer
                         } else {
@@ -183,17 +189,17 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
                         }
                     }
                 } else { //si l'article courrent est en chevauchement
-                    *trouv = (cleCherche == buf.cleMax); //on est certain que la cle qui est en chevauchement
+                    *trouv = (cleCherche == buf->cleMax); //on est certain que la cle qui est en chevauchement
                     // est la derniere cle qui est aussi le max du bloc
                     // donc si on arrive au dernier element chevauché alors c'est le max
                 }
 
             }
-        } else {
-            *trouv = FAUX;
-            *adrBloc = 0;
-            *Pos = 0;
         }
+    } else {
+        *trouv = FAUX;
+        *adrBloc = 0;
+        *Pos = 0;
     }
 
     //****Affichage du nombre d'acces au disque

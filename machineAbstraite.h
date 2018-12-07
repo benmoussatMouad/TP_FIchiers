@@ -14,14 +14,13 @@
 //Valeurs logiques:
 #define VRAI 1
 #define FAUX 0
-
 //***********Declaration des types*********
 
 typedef struct Bloc {
     int cleMax;
     char chevauch[3]; //Indique le nombre de caractère en chevauchement dans le bloc, si egal à 0 pas de chevauchement
     char Tab[TAILLE_BLOC];
-} BLOC;
+}* BLOC;
 
 typedef struct fichier  {
     struct Tentete {
@@ -33,6 +32,8 @@ typedef struct fichier  {
     int blocCourrent;
     FILE* file;
 } * FICHIER;
+
+#define TAILLE_ENTETE sizeof(struct Tentete)
 
 
 //***********Procedures du Modele*******

@@ -28,21 +28,38 @@ int main() {
 
     //***********Menu principale******************
 
-    printf("Bienvenue dans le programme de gestion de ficheir\n\t\tQue voulez vous faire ?\n\n");
-    printf("\t1.Rechercher une donne."
-           "\n\t2.Inserer une donne."
-           "\n\t3.Supprimer une donne."
-           "\n\t4.Afficher l'entete de votre fichier."
-           "\n\t5.Afficher le contenu d'un bloc donne en MS."
-           "\n\t6.Afficher le contenu du fichier bloc par bloc."
-           "\n\t7.Reorganiser le fichier manuellement.");
-    printf("\n\nEntrez un choix : ");
-    scanf("%c", &inputChar);
+    int quit = 0;
+    while (!quit) {
+        printf("Bienvenue dans le programme de gestion de ficheir\n\t\tQue voulez vous faire ?\n\n");
+        printf("\t1.Rechercher une donne."
+               "\n\t2.Inserer une donne."
+               "\n\t3.Supprimer une donne."
+               "\n\t4.Afficher l'entete de votre fichier."
+               "\n\t5.Afficher le contenu d'un bloc donne en MS."
+               "\n\t6.Afficher le contenu du fichier bloc par bloc."
+               "\n\t7.Reorganiser le fichier manuellement.");
+        printf("\n\nEntrez un choix : ");
+        fflush(stdin);
+        scanf("%c", &inputChar);
 
-    //*********************************************
-    switch (inputChar) {
-        default:
-            return 0;
+        //*********************************************
+        switch (inputChar) {
+            case '1':
+                CLEAR;
+                puts("Entrez la cle à chercher: ");
+                char cle[5];
+                fflush(stdin);
+                gets(cle);
+                int trouv, bloc, pos;
+                Recherche(F, cle, &trouv, &bloc, &pos);
+                if (trouv)
+                    printf("La donne se trouve dans le bloc %d a la position %d\n.", bloc, pos);
+                else
+                    printf("La donne n'est pas trouve.\n");
+                break;
+            default:
+                return 0;
+        }
     }
     return 0;
 }
