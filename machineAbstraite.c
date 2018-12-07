@@ -101,7 +101,7 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
     int nbAccesMS = 0;
     int nonSequentiel = FAUX;
 
-    if ( Entete(f, 1) == 0) {
+    if ( Entete(f, 1) != 0) {
         //*************************************
         //Recherche Dicothomique sur les blocs
         //*************************************
@@ -189,11 +189,11 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
                 }
 
             }
-        } else {
-            *trouv = FAUX;
-            *adrBloc = 0;
-            *Pos = 0;
         }
+    }else {
+        *trouv = FAUX;
+        *adrBloc = 0;
+        *Pos = 0;
     }
 
     //****Affichage du nombre d'acces au disque
@@ -304,5 +304,11 @@ void Suppression(FICHIER f,char * cle){
 }
 //------------------------------------------------
 
+void AffichEntete(FICHIER f){
+    printf("\t\n Le nombre de bloc(s) : %d"
+    "\t\n Le nombre d'article(s) : %d"
+    "\t\n Le nombre de caractere(s) insere(s) : %d"
+    "\t\n Le nombre de caractere(s) supprime(s): %d \n",Entete(f,0),Entete(f,1),Entete(f,2),Entete(f,3));
+}
 
 
