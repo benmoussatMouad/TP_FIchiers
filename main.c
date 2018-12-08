@@ -1,6 +1,6 @@
 #include "machineAbstraite.h"
 
-#define CLEAR system("cls")
+#define CLEAR //system("cls");
 
 int main() {
     char nomFichier[40];
@@ -32,7 +32,12 @@ int main() {
 
     //***********Menu principale******************
 
+    char OUT[1000];
+    BLOC buf = malloc(sizeof(BLOC));
+    char cle[5]; //Sert pour la lecture en entree
     int quit = 0;
+    int trouv, bloc, pos;
+
     while (!quit) {
         printf("Bienvenue dans le programme de gestion de ficheir\n\t\tQue voulez vous faire ?\n\n");
         printf("\t1.Rechercher une donne."
@@ -44,18 +49,19 @@ int main() {
                "\n\t7.Reorganiser le fichier manuellement."
                "\n\tAutres. Fermer et sauvegarder.");
         printf("\n\nEntrez un choix : ");
-        fflush(stdin);
-        scanf("%c", &inputChar);
+        scanf(" %d", &inpuInt);
+        puts("BONJOUR !!");
+        printf("%d", inpuInt);
 
         //*********************************************
-        char cle[5]; //Sert pour la lecture en entree
-        switch (inputChar) {
-            case '1': //Recherche
+        switch (inpuInt) {
+            case 1: //Recherche
                 CLEAR;
                 puts("Entrez la cle à chercher: ");
                 fflush(stdin);
-                gets(cle);
-                int trouv, bloc, pos;
+                puts("AVANT");
+                scanf(" %s", cle);
+                puts("APRES");
                 Recherche(F, cle, &trouv, &bloc, &pos);
                 if (trouv) {
                     printf("La donne se trouve dans le bloc %d a la position %d\n.", bloc, pos);
@@ -65,34 +71,39 @@ int main() {
                 }
                 getch();
                 break;
-
-            case '2':
+            case 2:
                 CLEAR;
                 puts("Entrez la cle de la donne a inserer (4 car) : ");
                 fflush(stdin);
-                gets(cle);
+                puts("AVANT");
+                scanf(" %s", cle);
+                puts("APRES");
                 Insertion(F, cle);
                 getch();
                 break;
-            case '3':
+            case 3:
                 CLEAR;
                 puts("Entrez la cle à supprimer : ");
                 fflush(stdin);
-                gets(cle);
+                scanf("%s", cle);
                 Suppression(F, cle);
                 getch();
                 break;
-            case '5':
+            case 5:
                 CLEAR;
                 puts("Entrez le nombre du bloc à afficher :");
+                fflush(stdin);
                 scanf("%d", &inpuInt);
-                BLOC buf = malloc(sizeof(BLOC));
                 LireDir(F, inpuInt, buf);
-                char
+                for (int i = 0; i < 999; ++i) {
+                    OUT[i] = buf->Tab[i];
+                }
+                OUT[999] = '\0';
+                puts(OUT);
                 getch();
                 break;
 
-            case '4':   //Afficher Entete
+            case 4:   //Afficher Entete
                 AffichEntete(F);
                 getch();
                 break;
