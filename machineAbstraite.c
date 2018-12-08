@@ -98,128 +98,22 @@ void Aff_Entete (FICHIER f, int i, int val) {
     }
 }
 
-void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
-    int Bi, Bs, milieu;
-    int blocTrouv = 0;
-    int cleCherche;
-    int nbAccesMS = 0;
-    int nonSequentiel = FAUX;
 
-    BLOC buf = malloc(sizeof(BLOC));
-
-
-    if ( Entete(f, 1) != 0) {
-        //*************************************
-        //Recherche Dicothomique sur les blocs
-        //*************************************
-        cleCherche = atoi(cle); //on convertie la cle en un entier
-        Bi = 1;
-        Bs = Entete(f, 0);
-
-        while (Bi <= Bs && !blocTrouv) {
-
-            milieu = (Bi + Bs) / 2;
-            LireDir(f, milieu, buf);
-            nbAccesMS++;
-
-            if ( cleCherche <= buf->cleMax ) {
-                LireDir(f, milieu - 1, buf);
-                nbAccesMS++;
-
-                if ( cleCherche > buf->cleMax ) { //la valeur se trouve dans le bloc mileu
-                    *adrBloc = milieu;
-                    blocTrouv = 1;
-                } else {
-                    Bs = milieu - 1;
-                }
-            } else {
-                Bi = milieu + 1;
-                if ( Bi > Entete(f, 0)) { //la valeurs cherche est plus grande que toutes les valeurs du fichiers
-
-                    nonSequentiel = VRAI; //pas la peine de faire une recherche sequentielle dans le bloc
-                    *trouv = FAUX;
-
-                    *Pos = Entete(f, 2) % 999; //On calcul la position du dernier caractere dans le dernier bloc
-
-                    if ( *Pos == 0 ) { //si le dernier bloc est plein alors
-                        *adrBloc = Entete(f, 0) + 1; //pour faciliter l'insertion aucas ou la valeur depasse la plus grande valeur
-                    } else
-                        *adrBloc = Entete(f, 0); //sinon on retourne la position ou il faut inserer
-                }
-            }
-        }
-
-        //*********************************
-        //Recherche SEQUENTIEL dans le bloc trouvé
-        //*********************************
-        if (!nonSequentiel) {
-            LireDir(f, *adrBloc, buf);
-            nbAccesMS++;
-
-            int j = atoi(buf->chevauch); //on commence le parcours depuis la fin du chevauchement,
-            *trouv = FAUX;
-            int finBloc = FAUX; //designe la fin du bloc
-
-            char taille[4]; //variable utilise pour sauver la taille courrente
-            int tailleCour; //conversion en entier de la taille
-            char cleCour[5];//utilise pour sauver la cle courrente
-            int cleC;       //Conversion de la cle courrente en entier
-
-            while (!*trouv && !finBloc) {
-                if ((j + TAILLE_TAILLE + TAILLE_EFF + TAILLE_CLE) <= TAILLE_BLOC - 1 ) {
-                    //si l'article courrent n'est pas en chevauchement
-
-                    memcpy(taille, &buf->Tab[j], 3); //Extraie une sous chaine allant de j a j+3 (la taille)
-                    taille[3] = '\0';
-
-                    tailleCour = atoi(taille);      //conversion de taille
-
-                    memcpy(cleCour, &buf->Tab[j + 4], 4); //extraction de la cle
-                    cleCour[4] = '\0';
-                    cleC = atoi(cleCour);
-
-                    if ( strcmp(cleCour, cle) == 0 ) { // si les cle sont identique alors
-                        *trouv = VRAI;
-                        *Pos = j;
-                    } else {
-                        if ( cleCherche > cleC || cleC == buf->cleMax) {
-                            finBloc = VRAI;
-                            *Pos = j; //la position ou il faut inserer
-                        } else {
-                            j += tailleCour;
-                        }
-                    }
-                } else { //si l'article courrent est en chevauchement
-                    *trouv = (cleCherche == buf->cleMax); //on est certain que la cle qui est en chevauchement
-                    // est la derniere cle qui est aussi le max du bloc
-                    // donc si on arrive au dernier element chevauché alors c'est le max
-                }
-
-            }
-        }
-    } else {
-        *trouv = FAUX;
-        *adrBloc = 0;
-        *Pos = 0;
-    }
-
-    //****Affichage du nombre d'acces au disque
-    printf("Il y a eu %d acces au disque.\n", nbAccesMS);
-}
-//-------------------------------------------------
 
 void creationArticle(char * cle, char info[990], char taille[3], char efface, char Article[998])// Créer une chaine qui representera l'article
 {
-    for (int i = 0; i < 3 ; ++i) { // ecrire la taille de l'article
+    for (int i = 0; i < TAILLE_TAILLE ; ++i) { // ecrire la taille de l'article
         Article[i]=taille[i];
     }
     Article[3]=efface; // ecrire le caractere qui mentionne si l'article est effacé ou non
-    for (int i = 4; i < 8 ; ++i) { // ecrire la clé
+    for (int i = 4; i < TAILLE_CLE+4 ; ++i) { // ecrire la clé
         Article[i]=cle[i-4];
     }
     for (int i = 0; i < strlen(info) ; ++i) {// ecrire l'info
         Article[i+8]=info[i];
     }
+    Article[strlen(info)+8]='\0';
+
 }
 //-------------------------------------------------
 void decalBloc(FICHIER F,int i,int j, int * nbAccees)// décaler le bloc numero i de j positions et mettre à jour le nombre d'accees au disque
@@ -230,33 +124,36 @@ void decalBloc(FICHIER F,int i,int j, int * nbAccees)// décaler le bloc numero 
 
     LireDir(F,i,buf1);
     (*nbAccees)++;
-    if (strlen(buf1->Tab)+j<=998){ // le cas où le nombre de caracteres dans le bloc plus le décalage est inferieur à taille bloc
-        for (int k = strlen(buf1->Tab); k <1 ; --k) {
+    if (Entete(F,0)==i){
+    if (Entete(F,3)%999-1+j <=TAILLE_BLOC-1 ){ // le cas où le nombre de caracteres dans le bloc plus le décalage est inferieur à taille bloc, cas du denier bloc
+        for (int k = Entete(F,3)%999-1; k > -1 ; --k) {
             buf1->Tab[k+j]=buf1->Tab[k];
         }
-    } else{
-        Aff_Entete(F,0,Entete(F,0)+1);
+    }else{// le cas où le bloc est à la fin
+        for (int k = 998; k > -1 ; --k) {
+            if (k+j>998){
+                buf2->Tab[(k+j)%999]=buf1->Tab[k];
+            }else{
+                buf1->Tab[k+j]=buf1->Tab[k];
+            }
+        }
+    }
+    EcrireDir(F,i+1,buf2);
+    (*nbAccees)++;}
+    else{
         if (Entete(F,0)>i){ //le cas où le bloc est au milieu
             LireDir(F,i+1,buf2);
             (*nbAccees)++;
-            for (int k = 999; k <1 ; --k) {
+            for (int k = 998; k > -1 ; --k) {
                 if (k+j>998){
                     buf2->Tab[(k+j)%999]=buf1->Tab[k];
                 }else{
                     buf1->Tab[k+j]=buf1->Tab[k];
                 }
             }
-        }else{// le cas où le bloc est à la fin
-            for (int k = 999; k <1 ; --k) {
-                if (k+j>998){
-                    buf2->Tab[(k+j)%999]=buf1->Tab[k];
-                }else{
-                    buf1->Tab[k+j]=buf1->Tab[k];
-                }
-            }
+            EcrireDir(F,i+1,buf2);
+            (*nbAccees)++;
         }
-        EcrireDir(F,i+1,buf2);
-        (*nbAccees)++;
     }
     EcrireDir(F,i,buf1);
     (*nbAccees)++;
@@ -305,7 +202,7 @@ void Insertion (FICHIER F, char *cle)
                 EcrireDir(F,i,buf);
                 nbAccees++;
             }else{
-                if (i==Entete(F,0) && j==Entete(F,3)%999+1){ // le cas où il faut insérer à la fin sans création de nouveau bloc
+                if (i==Entete(F,0) && j==Entete(F,3)%999){ // le cas où il faut insérer à la fin sans création de nouveau bloc
                     LireDir(F,i,buf);
                     nbAccees++;
                     Aff_Entete(F, 1, Entete(F,1)+1);
@@ -326,8 +223,8 @@ void Insertion (FICHIER F, char *cle)
                     nbAccees++;
                 } else{ // le cas où il faut inserer au millieu
                     Aff_Entete(F,1,Entete(F,1)+1);
-                    Aff_Entete(F,3,Entete(F,3)+1);
-                    for (int k = Entete(F,0); k < i;--k) {
+                    Aff_Entete(F,3,Entete(F,3)+atoi(taille));
+                    for (int k = Entete(F,0); k > i-1;--k) {
                         decalBloc(F,k,atoi(taille),&nbAccees);
                     }
                     LireDir(F,i,buf);
@@ -388,5 +285,8 @@ void AffichEntete(FICHIER f){
     "\t\n Le nombre de caractere(s) insere(s) : %d"
     "\t\n Le nombre de caractere(s) supprime(s): %d \n",Entete(f,0),Entete(f,1),Entete(f,2),Entete(f,3));
 }
+
+
+//----------------------------------
 
 
