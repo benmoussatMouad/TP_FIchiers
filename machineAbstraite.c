@@ -23,7 +23,7 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
         return 0;
     }
     else if( mode == 'n') {
-        f->file = fopen("./test", "w");
+        f->file = fopen("./test", "w+");
         perror("fopen");
         f->entete.carInseres = 0;
         f->entete.carSupprimes = 0;
@@ -38,6 +38,7 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
 }
 //-------------------------------------------------
 void Fermer (FICHIER f) {
+    fwrite(&f->entete, TAILLE_ENTETE, 1,SEEK_SET);
     fclose(f->file);
 }
 //-------------------------------------------------
@@ -207,24 +208,63 @@ void Recherche (FICHIER f, char *cle, int *trouv, int *adrBloc, int *Pos) {
 }
 //-------------------------------------------------
 
-void creationArticle(char * cle, char info[990], char taille[3], char efface, char Article[998])
+void creationArticle(char * cle, char info[990], char taille[3], char efface, char Article[998])// Créer une chaine qui representera l'article
 {
-    for (int i = 0; i < 3 ; ++i) {
+    for (int i = 0; i < 3 ; ++i) { // ecrire la taille de l'article
         Article[i]=taille[i];
     }
-    Article[3]=efface;
-    for (int i = 4; i < 8 ; ++i) {
+    Article[3]=efface; // ecrire le caractere qui mentionne si l'article est effacé ou non
+    for (int i = 4; i < 8 ; ++i) { // ecrire la clé
         Article[i]=cle[i-4];
     }
-    for (int i = 0; i < strlen(info) ; ++i) {
+    for (int i = 0; i < strlen(info) ; ++i) {// ecrire l'info
         Article[i+8]=info[i];
     }
 }
 //-------------------------------------------------
+void decalBloc(FICHIER F,int i,int j, int * nbAccees)// décaler le bloc numero i de j positions et mettre à jour le nombre d'accees au disque
+                                                    // on en aura besoin de ce module dans l'insertion
+{
+    BLOC buf1 = malloc(sizeof(BLOC));
+    BLOC buf2 = malloc(sizeof(BLOC));
 
+    LireDir(F,i,buf1);
+    (*nbAccees)++;
+    if (strlen(buf1->Tab)+j<=998){ // le cas où le nombre de caracteres dans le bloc plus le décalage est inferieur à taille bloc
+        for (int k = strlen(buf1->Tab); k <1 ; --k) {
+            buf1->Tab[k+j]=buf1->Tab[k];
+        }
+    } else{
+        Aff_Entete(F,0,Entete(F,0)+1);
+        if (Entete(F,0)>i){ //le cas où le bloc est au milieu
+            LireDir(F,i+1,buf2);
+            (*nbAccees)++;
+            for (int k = 999; k <1 ; --k) {
+                if (k+j>998){
+                    buf2->Tab[(k+j)%999]=buf1->Tab[k];
+                }else{
+                    buf1->Tab[k+j]=buf1->Tab[k];
+                }
+            }
+        }else{// le cas où le bloc est à la fin
+            for (int k = 999; k <1 ; --k) {
+                if (k+j>998){
+                    buf2->Tab[(k+j)%999]=buf1->Tab[k];
+                }else{
+                    buf1->Tab[k+j]=buf1->Tab[k];
+                }
+            }
+        }
+        EcrireDir(F,i+1,buf2);
+        (*nbAccees)++;
+    }
+    EcrireDir(F,i,buf1);
+    (*nbAccees)++;
+}
+//-------------------------------------------------
 void Insertion (FICHIER F, char *cle)
 {
-    int i, j, trouv, n;
+    int i, j, trouv, nbAccees=0;
     char Info[990];
     char Article[998];
     char taille[3];
@@ -233,80 +273,112 @@ void Insertion (FICHIER F, char *cle)
     printf("Donner l'info: ");
     scanf("%s", Info);
     itoa(strlen(Info)+3+1+4,taille,10);
-    creationArticle(cle,Info,taille,'0',Article);
+    creationArticle(cle,Info,taille,'0',Article); // on crée l'article qu'on veut insérer
     Recherche(F,cle,&trouv,&i,&j);
-    if (trouv){
+    if (trouv){  // le cas où la clé existe deja
         printf("\n La cle existe deja!\n");
-        LireDir(F,i,buf);
-        buf->Tab[j+3]='0';
-        EcrireDir(F,i,buf);
+        if(j+3<999){
+            LireDir(F, i, buf);
+            buf->Tab[j + 3] = '0';
+            EcrireDir(F, i, buf);
+            nbAccees+=2;
+        }else{
+            LireDir(F, i + 1, buf);
+            buf->Tab[(j+3)%999]='0';
+            EcrireDir(F, i + 1, buf);
+            nbAccees+=2;
+        }
     } else{
-        if (i==0 && j==0 ){
+        if (i==0 && j==0 ){// le cas de fichier vide
             strcpy(buf->Tab, Article);
-            buf->cleMax=atoi(cle);
-            itoa(0, buf->chevauch, 10);
             Aff_Entete(F,0,1);
             Aff_Entete(F, 1, 1);
-            Aff_Entete(F, 2, atoi(taille));
-            EcrireDir(F,i,buf);
+            Aff_Entete(F, 3, atoi(taille));
+            EcrireDir(F,1,buf);
+            nbAccees++;
         }else{
-            if (i==Entete(F,0)+1){
+            if (i==Entete(F,0)+1){ // le cas où il faut insérer à la fin avec creation de nouveau bloc
                 strcpy(buf->Tab, Article);
-                buf->cleMax = atoi(cle);
                 Aff_Entete(F,0,Entete(F,0)+1);
-                Aff_Entete(F, 1, Entete(F,2)+1);
-                Aff_Entete(F, 2, Entete(F,2)+atoi(taille));
-                itoa(0,buf->chevauch,10);
+                Aff_Entete(F, 1, Entete(F,1)+1);
+                Aff_Entete(F, 3, Entete(F,3)+atoi(taille));
                 EcrireDir(F,i,buf);
+                nbAccees++;
             }else{
-                if (i==Entete(F,0) && j==Entete(F,3)%1000+1){
+                if (i==Entete(F,0) && j==Entete(F,3)%999+1){ // le cas où il faut insérer à la fin sans création de nouveau bloc
                     LireDir(F,i,buf);
-                    buf->cleMax=atoi(cle);
-                    Aff_Entete(F, 1, Entete(F,2)+1);
-                    Aff_Entete(F, 2, Entete(F,2)+atoi(taille));
+                    nbAccees++;
+                    Aff_Entete(F, 1, Entete(F,1)+1);
+                    Aff_Entete(F, 3, Entete(F,3)+atoi(taille));
                     for (int k = 0; k < atoi(taille) ; ++k) {
                         if ((j)>999){
                             EcrireDir(F,i,buf);
                             i++;
                             Aff_Entete(F,0,Entete(F,0)+1);
                             LireDir(F,i,buf);
-                            itoa(atoi(taille)-k-1,buf->chevauch,10);
                             j=0;
+                            nbAccees+=2;
                         }
-                        buf->Tab[0]=Article[k];
+                        buf->Tab[j]=Article[k];
                         j++;
                     }
                     EcrireDir(F,i,buf);
-                } else{
-                    //TODO: Insertion au milieu
+                    nbAccees++;
+                } else{ // le cas où il faut inserer au millieu
+                    Aff_Entete(F,1,Entete(F,1)+1);
+                    Aff_Entete(F,3,Entete(F,3)+1);
+                    for (int k = Entete(F,0); k < i;--k) {
+                        decalBloc(F,k,atoi(taille),&nbAccees);
+                    }
+                    LireDir(F,i,buf);
+                    for (int l = 0; l <atoi(taille) ; ++l) {
+                        if ((j)>999){
+                            EcrireDir(F,i,buf);
+                            i++;
+                            LireDir(F,i,buf);
+                            j=0;
+                            nbAccees+=2;
+                        }
+                        buf->Tab[j]=Article[l];
+                        j++;
+                    }
+                    EcrireDir(F,i,buf);
+                    nbAccees++;
                 }
             }
         }
     }
+    printf("\n Durant l'insertion, il y a eu %d accees au disque\n",nbAccees);
 }
 //-------------------------------------------------
 
 void Suppression(FICHIER f,char * cle){
-    int i,j,trouv;
+    int i,j,trouv,nbAccees=0;
     BLOC buf = malloc(sizeof(BLOC));
     char taille[3];
 
     Recherche(f,cle,&trouv,&i,&j);
-    if (trouv == VRAI){
+    if (trouv == VRAI){ // on supprime l'info si elle existe
         LireDir(f, i, buf);
+        nbAccees++;
         for (int k = 0; k < 3; ++k) {
             taille[k] = buf->Tab[j];
             if ( j == 998 ) {
                 j = 0;
                 EcrireDir(f, i, buf);
-                LireDir(f, i + 1, buf);
+                i++;
+                LireDir(f, i , buf);
+                nbAccees+=2;
+            } else{
+                j++;
             }
-            j++;
         }
-        Aff_Entete(f,3,Entete(f,3)+atoi(taille));
+        Aff_Entete(f,2,Entete(f,2)+atoi(taille));
         buf->Tab[j]='1';
-        EcrireDir(f,i+1,buf);
+        EcrireDir(f,i,buf);
+        nbAccees++;
     }
+    printf("\nDurant la suppression, il y a eu %d accees au disque\n",nbAccees);
 }
 //------------------------------------------------
 
