@@ -5,11 +5,11 @@
 #include "stdio.h"
 #include "string.h"
 #include "stdlib.h"
-
+#include "conio.h"
 
 #define TAILLE_BLOC 999
-#define TAILLE_TAILLE 4
-#define TAILLE_CLE 3
+#define TAILLE_TAILLE 3
+#define TAILLE_CLE 4
 #define TAILLE_EFF 1
 //Valeurs logiques:
 #define VRAI 1
@@ -17,6 +17,8 @@
 //***********Declaration des types*********
 
 typedef struct Bloc {
+    //On considerera que chaque article est ordone comme ça:
+    // TAILLE - EFF - CLE - INFO ...
     char Tab[TAILLE_BLOC];
 }* BLOC;
 
