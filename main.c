@@ -11,13 +11,12 @@ int main() {
     FICHIER F = malloc(sizeof(FICHIER)); //allouer un espace memoire suffisant
 
 
-    printf("%d", TAILLE_ENTETE);
     do {
         printf("Entrez le nom du fichier :");
         gets(nomFichier);
         printf("Entrez le mode (n/a) : ");
         scanf("%c", &inputChar);
-        if (Ouvrir(F, nomFichier, 'n') == 0) {
+        if (Ouvrir(F, nomFichier, inputChar) == 0) {
             printf("Fichier ouvert avec succe");
             gets(NULL);
             erreur = 0;
@@ -61,6 +60,7 @@ int main() {
                 else {
                     printf("La donne n'est pas trouve.\n");
                 }
+                getch();
                 break;
 
             case '2':
@@ -68,7 +68,7 @@ int main() {
                 puts("Entrez la cle de la donne a inserer (4 car) : ");
                 fflush(stdin);
                 gets(cle);
-                Insertion(F, cle);
+                getch();
                 break;
             case '5':
                 CLEAR;
@@ -77,10 +77,12 @@ int main() {
                 BLOC buf = malloc(sizeof(BLOC));
                 LireDir(F, inpuInt, buf);
                 fwrite(buf, TAILLE_BLOC, 1, stdout);
+                getch();
                 break;
 
             case '4':   //Afficher Entete
                 AffichEntete(F);
+                getch();
                 break;
             default:
                 quit = 1;
