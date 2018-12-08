@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/TP_Fichiers.dir/main.c.obj"
+  "CMakeFiles/TP_Fichiers.dir/machineAbstraite.c.obj"
   "TP_Fichiers.pdb"
   "TP_Fichiers.exe"
   "TP_Fichiers.exe.manifest"

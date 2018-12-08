@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/X360/CLionProjects/TP_Fichiers
+# Install script for directory: C:/Users/hp/CLionProjects/TP_FIchiers
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -27,11 +27,6 @@ if(NOT CMAKE_INSTALL_COMPONENT)
   endif()
 endif()
 
-# Is this installation the result of a crosscompile?
-if(NOT DEFINED CMAKE_CROSSCOMPILING)
-  set(CMAKE_CROSSCOMPILING "FALSE")
-endif()
-
 if(CMAKE_INSTALL_COMPONENT)
   set(CMAKE_INSTALL_MANIFEST "install_manifest_${CMAKE_INSTALL_COMPONENT}.txt")
 else()
@@ -40,5 +35,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/X360/CLionProjects/TP_Fichiers/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/hp/CLionProjects/TP_FIchiers/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
