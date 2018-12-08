@@ -14,14 +14,16 @@ int main() {
     do {
         printf("Entrez le nom du fichier :");
         gets(nomFichier);
+        fflush(stdin);
         printf("Entrez le mode (n/a) : ");
         scanf("%c", &inputChar);
         if (Ouvrir(F, nomFichier, inputChar) == 0) {
             printf("Fichier ouvert avec succe");
-            gets(NULL);
+            getch();
             erreur = 0;
         } else {
             printf("Erreur reesayez.\n\n\n");
+            getch();
         }
 
     } while (erreur);
@@ -39,7 +41,8 @@ int main() {
                "\n\t4.Afficher l'entete de votre fichier."
                "\n\t5.Afficher le contenu d'un bloc donne en MS."
                "\n\t6.Afficher le contenu du fichier bloc par bloc."
-               "\n\t7.Reorganiser le fichier manuellement.");
+               "\n\t7.Reorganiser le fichier manuellement."
+               "\n\tAutres. Fermer et sauvegarder.");
         printf("\n\nEntrez un choix : ");
         fflush(stdin);
         scanf("%c", &inputChar);
@@ -68,6 +71,15 @@ int main() {
                 puts("Entrez la cle de la donne a inserer (4 car) : ");
                 fflush(stdin);
                 gets(cle);
+                Insertion(F, cle);
+                getch();
+                break;
+            case '3':
+                CLEAR;
+                puts("Entrez la cle à supprimer : ");
+                fflush(stdin);
+                gets(cle);
+                Suppression(F, cle);
                 getch();
                 break;
             case '5':
@@ -76,7 +88,7 @@ int main() {
                 scanf("%d", &inpuInt);
                 BLOC buf = malloc(sizeof(BLOC));
                 LireDir(F, inpuInt, buf);
-                fwrite(buf, TAILLE_BLOC, 1, stdout);
+                char
                 getch();
                 break;
 
@@ -85,6 +97,7 @@ int main() {
                 getch();
                 break;
             default:
+                Fermer(F);
                 quit = 1;
                 break;
         }
