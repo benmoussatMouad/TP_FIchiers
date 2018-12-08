@@ -17,8 +17,6 @@
 //***********Declaration des types*********
 
 typedef struct Bloc {
-    int cleMax;
-    char chevauch[3]; //Indique le nombre de caractère en chevauchement dans le bloc, si egal à 0 pas de chevauchement
     char Tab[TAILLE_BLOC];
 }* BLOC;
 
