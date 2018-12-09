@@ -9,6 +9,7 @@ int main() {
     int erreur = 1;
 
     FICHIER F = malloc(sizeof(FICHIER)); //allouer un espace memoire suffisant
+    BLOC buf = malloc(sizeof(BLOC));
 
 
     do {
@@ -18,7 +19,7 @@ int main() {
         printf("Entrez le mode (n/a) : ");
         scanf("%c", &inputChar);
         if (Ouvrir(F, nomFichier, inputChar) == 0) {
-            printf("Fichier ouvert avec succe");
+            printf("Fichier ouvert avec succees");
             getch();
             erreur = 0;
         } else {
@@ -31,9 +32,8 @@ int main() {
     CLEAR;
 
     //***********Menu principale******************
-
     char OUT[1000];
-    BLOC buf = malloc(sizeof(BLOC));
+    puts("anaaa");
     char cle[5]; //Sert pour la lecture en entree
     int quit = 0;
     int trouv, bloc, pos;
@@ -107,6 +107,19 @@ int main() {
                 AffichEntete(F);
                 getch();
                 break;
+            case 6:
+                for (int j = 1; j <Entete(F,0)+1 ; ++j) {
+                    LireDir(F, j, buf);
+                    printf("Bloc %d :",j);
+                    for (int k = 0; k < 999; ++k) {
+                        OUT[k] = buf->Tab[k];
+                    }
+                    OUT[999] = '\0';
+                    puts(OUT);
+                }
+                getch();
+                break;
+
             default:
                 Fermer(F);
                 quit = 1;
