@@ -33,7 +33,7 @@ typedef struct fichier  {
     FILE* file;
 } * FICHIER;
 
-BLOC buff ;
+BLOC buff , buffTmp;
 #define TAILLE_ENTETE sizeof(struct Tentete)
 
 

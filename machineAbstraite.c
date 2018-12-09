@@ -11,6 +11,7 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
     strcpy(chemin, ".\\");
     strcat(chemin, nomFichier);
     buff= malloc(sizeof(BLOC));
+    buffTmp= malloc(sizeof(BLOC));
 
     if ( mode == 'a' ) {
         (*f).file = fopen(chemin, "rb+");
@@ -36,7 +37,7 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
         f->entete.nbArticles = 0;
         f->entete.nbBlocs = 0;
         f->blocCourrent = 0;
-        //fwrite(&f->entete, 1, TAILLE_ENTETE, f->file);
+        fwrite(&f->entete, 1, TAILLE_ENTETE, f->file);
         puts("fopen");
         return 0;
     }
@@ -116,7 +117,6 @@ void Aff_Entete (FICHIER f, int i, int val) {
 }
 //-------------------------------------------------
 void Recherche (FICHIER f, char *cleCherche, int *trouv, int *adrBloc, int *Pos) {
-    BLOC buff;
     puts("RECHERCHE");
     int cleChercheCv = atoi(cleCherche);
     puts("atoi marche");
@@ -264,42 +264,42 @@ void creationArticle(char * cle, char info[990], char taille[4], char efface, ch
 void decalBloc(FICHIER F,int i,int j, int * nbAccees)// décaler le bloc numero i de j positions et mettre à jour le nombre d'accees au disque
                                                     // on en aura besoin de ce module dans l'insertion
 {
-    BLOC buff1 = malloc(sizeof(BLOC));
-    BLOC buff2 = malloc(sizeof(BLOC));
-    LireDir(F,i,buff1);
+    //BLOC buff = malloc(sizeof(BLOC));
+    //BLOC buffTmp = malloc(sizeof(BLOC));
+    LireDir(F,i,buff);
     (*nbAccees)++;
     if (Entete(F,0)==i){
     if (Entete(F,3)%999-1+j <=TAILLE_BLOC-1 ){ // le cas où le nombre de caracteres dans le bloc plus le décalage est inferieur à taille bloc, cas du denier bloc
         for (int k = Entete(F,3)%999-1; k > -1 ; --k) {
-            buff1->Tab[k+j]=buff1->Tab[k];
+            buff->Tab[k+j]=buff->Tab[k];
         }
     }else{// le cas où le bloc est à la fin
-        for (int k = 998; k > -1 ; --k) {
+        for (int k = Entete(F,3)%999-1; k > -1 ; --k) {
             if (k+j>998){
-                buff2->Tab[(k+j)%999]=buff1->Tab[k];
+                buffTmp->Tab[(k+j)%999]=buff->Tab[k];
             }else{
-                buff1->Tab[k+j]=buff1->Tab[k];
+                buff->Tab[k+j]=buff->Tab[k];
             }
         }
     }
-    EcrireDir(F,i+1,buff2);
+    EcrireDir(F,i+1,buffTmp);
     (*nbAccees)++;}
     else{
         if (Entete(F,0)>i){ //le cas où le bloc est au milieu
-            LireDir(F,i+1,buff2);
+            LireDir(F,i+1,buffTmp);
             (*nbAccees)++;
             for (int k = 998; k > -1 ; --k) {
                 if (k+j>998){
-                    buff2->Tab[(k+j)%999]=buff1->Tab[k];
+                    buffTmp->Tab[(k+j)%999]=buff->Tab[k];
                 }else{
-                    buff1->Tab[k+j]=buff1->Tab[k];
+                    buff->Tab[k+j]=buff->Tab[k];
                 }
             }
-            EcrireDir(F,i+1,buff2);
+            EcrireDir(F,i+1,buffTmp);
             (*nbAccees)++;
         }
     }
-    EcrireDir(F,i,buff1);
+    EcrireDir(F,i,buff);
     (*nbAccees)++;
 }
 //-------------------------------------------------
@@ -341,7 +341,10 @@ void Insertion (FICHIER F, char *cle)
         }
     } else{
         if (i==0 && j==0 ){// le cas de fichier vide
-            strcpy(buff->Tab, Article);
+            //strcpy(buff->Tab, Article);
+            for (int k = 0; k < atoi(taille) ; ++k) {
+                buff->Tab[k]=Article[k];
+            }
             Aff_Entete(F,0,1);
             Aff_Entete(F, 1, 1);
             Aff_Entete(F, 3, atoi(taille));
@@ -349,7 +352,10 @@ void Insertion (FICHIER F, char *cle)
             nbAccees++;
         }else{
             if (i==Entete(F,0)+1){ // le cas où il faut insérer à la fin avec creation de nouveau bloc
-                strcpy(buff->Tab, Article);
+                //strcpy(buff->Tab, Article);
+                for (int k = 0; k < atoi(taille) ; ++k) {
+                    buff->Tab[k] = Article[k];
+                }
                 Aff_Entete(F,0,Entete(F,0)+1);
                 Aff_Entete(F, 1, Entete(F,1)+1);
                 Aff_Entete(F, 3, Entete(F,3)+atoi(taille));
@@ -359,15 +365,16 @@ void Insertion (FICHIER F, char *cle)
                 if (i==Entete(F,0) && j==Entete(F,3)%999){ // le cas où il faut insérer à la fin sans création de nouveau bloc
                     LireDir(F,i,buff);
                     puts("hna");
+                    puts(Article);
                     nbAccees++;
                     Aff_Entete(F, 1, Entete(F,1)+1);
                     Aff_Entete(F, 3, Entete(F,3)+atoi(taille));
+                    printf("%d",Entete(F,3));
                     for (int k = 0; k < atoi(taille) ; ++k) {
-                        if ((j)>999){
+                        if ((j)>998){
                             EcrireDir(F,i,buff);
                             i++;
                             Aff_Entete(F,0,Entete(F,0)+1);
-                            LireDir(F,i,buff);
                             j=0;
                             nbAccees+=2;
                         }
@@ -377,15 +384,14 @@ void Insertion (FICHIER F, char *cle)
                     EcrireDir(F,i,buff);
                     nbAccees++;
                 } else{ // le cas où il faut inserer au millieu
-                    puts("hambooook");
                     Aff_Entete(F,1,Entete(F,1)+1);
                     Aff_Entete(F,3,Entete(F,3)+atoi(taille));
-                    for (int k = Entete(F,0); k < i-1;--k) {
+                    for (int k = Entete(F,0); k > i-1;--k) {
                         decalBloc(F,k,atoi(taille),&nbAccees);
                     }
                     LireDir(F,i,buff);
                     for (int l = 0; l <atoi(taille) ; ++l) {
-                        if ((j)>999){
+                        if ((j)>998){
                             EcrireDir(F,i,buff);
                             i++;
                             LireDir(F,i,buff);
@@ -447,19 +453,32 @@ void AffichEntete(FICHIER f){
 //----------------------------------
 
 
-/*void reorganisation(FICHIER F){
-    BLOC buff1= malloc(sizeof(BLOC));
-    BLOC buff2= malloc(sizeof(BLOC));
-    int nbBloc=0, nbArticle=0,CarInserer=0;int j=0;
+void reorganisation(FICHIER F){
+    int nbBloc=0, nbArticle=0,CarInserer=0;int j=0,i=1;
+    char taille[4];
+    taille[4]='\0';
     FILE * intermediaire= fopen(".\\intermediaire","rb+");
-    for (int i = 1; i <Entete(F,0)+1 ; ++i) {
-        EcrireDir(F,i,buff1);
-        while (j != Entete(F,1)){
-            if j
+    if(Entete(F,0)!=0){
+        LireDir(F,1,buff);
+    while (j != Entete(F,3)%999 && i != Entete(F,0)){
+        taille[2]=buff->Tab[j];
+        taille[1]=buff->Tab[j+1];
+        taille[0]=buff->Tab[j+2];
+        if (buff->Tab[j+3]=="1"){
+            if (j+atoi(taille)>998){
+                i++;
+                j=(j+atoi(taille))%999;
+                LireDir(F,i,buff);
+            } else{
+                j+=atoi(taille);
+            }
+        } else{
+
         }
     }
+    }
 
-    }*/
+    }
 
 
 

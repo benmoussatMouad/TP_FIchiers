@@ -9,8 +9,6 @@ int main() {
     int erreur = 1;
 
     FICHIER F = malloc(sizeof(FICHIER)); //allouer un espace memoire suffisant
-    BLOC buf = malloc(sizeof(BLOC));
-
 
     do {
         printf("Entrez le nom du fichier :");
@@ -94,9 +92,9 @@ int main() {
                 puts("Entrez le nombre du bloc à afficher :");
                 fflush(stdin);
                 scanf("%d", &inpuInt);
-                LireDir(F, inpuInt, buf);
+                LireDir(F, inpuInt, buff);
                 for (int i = 0; i < 999; ++i) {
-                    OUT[i] = buf->Tab[i];
+                    OUT[i] = buff->Tab[i];
                 }
                 OUT[999] = '\0';
                 puts(OUT);
@@ -109,10 +107,10 @@ int main() {
                 break;
             case 6:
                 for (int j = 1; j <Entete(F,0)+1 ; ++j) {
-                    LireDir(F, j, buf);
+                    LireDir(F, j, buff);
                     printf("Bloc %d :",j);
                     for (int k = 0; k < 999; ++k) {
-                        OUT[k] = buf->Tab[k];
+                        OUT[k] = buff->Tab[k];
                     }
                     OUT[999] = '\0';
                     puts(OUT);
