@@ -27,7 +27,6 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
         return 0;
     }
     else if( mode == 'n') {
-        puts("haya");
         f->file = fopen(chemin, "wb+");
         if ( f->file == NULL) {
             perror("fopen");
@@ -38,7 +37,6 @@ int Ouvrir (FICHIER f, char* nomFichier, char mode) {
         f->entete.nbBlocs = 0;
         f->blocCourrent = 0;
         fwrite(&f->entete, 1, TAILLE_ENTETE, f->file);
-        puts("fopen");
         return 0;
     }
     else
@@ -117,9 +115,7 @@ void Aff_Entete (FICHIER f, int i, int val) {
 }
 //-------------------------------------------------
 void Recherche (FICHIER f, char *cleCherche, int *trouv, int *adrBloc, int *Pos) {
-    puts("RECHERCHE");
     int cleChercheCv = atoi(cleCherche);
-    puts("atoi marche");
     int nbAccesMS = 0;
     int parcour;
 
@@ -128,13 +124,9 @@ void Recherche (FICHIER f, char *cleCherche, int *trouv, int *adrBloc, int *Pos)
     char tailleCour[4];//Pour lire la taille de l'article courrent
     int tailleCv;       //La taille courrente convertie en entier
 
-    puts("buff");
-    puts("DECLARATIONS");
     if ( Entete(f, 0) != 0 ) {
-        puts("ENTETE NON VIDE");
         f->blocCourrent = 0;
         LireSeq(f, buff);
-        printf("%c%c%c%c", buff->Tab[0], buff->Tab[1], buff->Tab[2], buff->Tab[3]);
         nbAccesMS++;
 
         parcour = 0;
@@ -143,10 +135,8 @@ void Recherche (FICHIER f, char *cleCherche, int *trouv, int *adrBloc, int *Pos)
         *trouv = FAUX;
 
         while (!*trouv && !finRech) {
-            puts("BOUCLE");
             printf("%d",Entete(f,3));
             if (parcour != (Entete(f, 3) % 999) || (f->blocCourrent-1 ) != Entete(f, 0)) { //Si on arrive a la fin du fichier
-                puts("dkhal");
 //            //****Lecture de la taille et la cle courrente******
 //            int repere; //parcour de la cle ou la taille en chevauchement
 //
@@ -203,11 +193,6 @@ void Recherche (FICHIER f, char *cleCherche, int *trouv, int *adrBloc, int *Pos)
                 cleCour[5] = '\0';
                 cleCv = atoi(cleCour);
                 tailleCv = atoi(tailleCour);
-                printf("%d", cleCv);
-                printf("%d", tailleCv);
-
-                puts(tailleCour);
-                puts(cleCour);
 
                 if ( cleCv > cleChercheCv ) { //la cle n'existe pas
                     finRech = VRAI;
@@ -323,11 +308,11 @@ void Insertion (FICHIER F, char *cle)
         taille[1] = taille[0];
         taille[0] = '0';
     }
+    taille[3]='\0';
     creationArticle(cle,Info,taille,'0',Article); // on crée l'article qu'on veut insérer
     Recherche(F,cle,&trouv,&i,&j);
-    puts("ON EST LA ");
     if (trouv){  // le cas où la clé existe deja
-        printf("\n La cle existe deja!\n");
+        printf("\nLa cle existe deja!\n");
         if(j+3<999){
             LireDir(F, i, buff);
             buff->Tab[j + 3] = '0';
@@ -341,7 +326,6 @@ void Insertion (FICHIER F, char *cle)
         }
     } else{
         if (i==0 && j==0 ){// le cas de fichier vide
-            //strcpy(buff->Tab, Article);
             for (int k = 0; k < atoi(taille) ; ++k) {
                 buff->Tab[k]=Article[k];
             }
@@ -352,7 +336,6 @@ void Insertion (FICHIER F, char *cle)
             nbAccees++;
         }else{
             if (i==Entete(F,0)+1){ // le cas où il faut insérer à la fin avec creation de nouveau bloc
-                //strcpy(buff->Tab, Article);
                 for (int k = 0; k < atoi(taille) ; ++k) {
                     buff->Tab[k] = Article[k];
                 }
@@ -364,13 +347,11 @@ void Insertion (FICHIER F, char *cle)
             }else{
                 if (i==Entete(F,0) && j==Entete(F,3)%999){ // le cas où il faut insérer à la fin sans création de nouveau bloc
                     LireDir(F,i,buff);
-                    puts("hna");
                     puts(Article);
                     nbAccees++;
                     Aff_Entete(F, 1, Entete(F,1)+1);
                     Aff_Entete(F, 3, Entete(F,3)+atoi(taille));
-                    printf("%d",Entete(F,3));
-                    for (int k = 0; k < atoi(taille) ; ++k) {
+                    for (int W = 0; W < atoi(taille) ; ++W) {
                         if ((j)>998){
                             EcrireDir(F,i,buff);
                             i++;
@@ -378,7 +359,7 @@ void Insertion (FICHIER F, char *cle)
                             j=0;
                             nbAccees+=2;
                         }
-                        buff->Tab[j]=Article[k];
+                        buff->Tab[j]=Article[W];
                         j++;
                     }
                     EcrireDir(F,i,buff);
@@ -390,7 +371,7 @@ void Insertion (FICHIER F, char *cle)
                         decalBloc(F,k,atoi(taille),&nbAccees);
                     }
                     LireDir(F,i,buff);
-                    for (int l = 0; l <atoi(taille) ; ++l) {
+                    for (int v = 0; v <atoi(taille) ; ++v) {
                         if ((j)>998){
                             EcrireDir(F,i,buff);
                             i++;
@@ -398,7 +379,7 @@ void Insertion (FICHIER F, char *cle)
                             j=0;
                             nbAccees+=2;
                         }
-                        buff->Tab[j]=Article[l];
+                        buff->Tab[j]=Article[v];
                         j++;
                     }
                     EcrireDir(F,i,buff);
@@ -407,14 +388,13 @@ void Insertion (FICHIER F, char *cle)
             }
         }
     }
-    printf("\n Durant l'insertion, il y a eu %d accees au disque\n",nbAccees);
+    printf("\nDurant l'insertion, il y a eu %d accees au disque\n",nbAccees);
 }
 
 //-------------------------------------------------
 
 void Suppression(FICHIER f,char * cle){
     int i,j,trouv,nbAccees=0;
-    puts("suppression");
     char taille[3];
 
     Recherche(f,cle,&trouv,&i,&j);
@@ -453,31 +433,93 @@ void AffichEntete(FICHIER f){
 //----------------------------------
 
 
-void reorganisation(FICHIER F){
-    int nbBloc=0, nbArticle=0,CarInserer=0;int j=0,i=1;
+void Reorganisation(FICHIER F){
+
+
+    int nbBloc=0, nbArticle=0,CarInserer=0;
+    int j=0,i=1,k=0,l=1,parcour=0;
+    char efface;
     char taille[4];
+    char info[990];
+    char Article[998];
+    char cle[5];
     taille[4]='\0';
-    FILE * intermediaire= fopen(".\\intermediaire","rb+");
+
+
+
     if(Entete(F,0)!=0){
         LireDir(F,1,buff);
-    while (j != Entete(F,3)%999 && i != Entete(F,0)){
-        taille[2]=buff->Tab[j];
-        taille[1]=buff->Tab[j+1];
-        taille[0]=buff->Tab[j+2];
-        if (buff->Tab[j+3]=="1"){
-            if (j+atoi(taille)>998){
-                i++;
-                j=(j+atoi(taille))%999;
-                LireDir(F,i,buff);
-            } else{
-                j+=atoi(taille);
+        while (parcour != Entete(F,3)%999 || i != Entete(F,0)){
+            j=parcour;
+            for (int m = 0; m <3; ++m) {
+                if (j>998){
+                    i++;
+                    LireDir(F,i,buff);
+                    j=0;
+                }
+                taille[m]=buff->Tab[j];
+                j++;
             }
-        } else{
-
+            taille[3]='\0';
+            if (j>998){
+                i++;
+                LireDir(F,i,buff);
+                j=0;
+                efface=buff->Tab[j];
+            } else {efface=buff->Tab[j];}
+            j++;
+            for (int n = 0; n <4; ++n) {
+                if (j>998){
+                    i++;
+                    LireDir(F,i,buff);
+                    j=0;
+                }
+                cle[n]=buff->Tab[j];
+                j++;
+            }
+            cle[4]='\0';
+            for (int n = 0; n < atoi(taille)-8; ++n) {
+                if (j>998){
+                    i++;
+                    LireDir(F,i,buff);
+                    j=0;
+                }
+                info[n]=buff->Tab[j];
+                j++;
+            }
+            info[990]='\0';
+            creationArticle(cle,info,taille,efface,Article);
+            if (efface=='1'){
+                parcour+=atoi(taille);
+            }else{
+                if (Entete(Intermediaire,0)==0){
+                    Aff_Entete(Intermediaire,0,1);
+                }
+                for (int m = 0; m < atoi(taille); ++m) {
+                    if (k>998){
+                        EcrireDir(Intermediaire,l,buffTmp);
+                        Aff_Entete(Intermediaire,0,Entete(Intermediaire,0)+1);
+                        l++;
+                        k=0;
+                    }
+                    buffTmp->Tab[k]=Article[m];
+                    k++;
+                }
+                Aff_Entete(Intermediaire,1,Entete(Intermediaire,1)+1);
+                Aff_Entete(Intermediaire,3,Entete(Intermediaire,3)+atoi(taille));
+                parcour+=atoi(taille);
+            }
+        }
+        EcrireDir(Intermediaire,l,buffTmp);
+        Aff_Entete(F,0,Entete(Intermediaire,0));
+        Aff_Entete(F,1,Entete(Intermediaire,1));
+        Aff_Entete(F,3,Entete(Intermediaire,3));
+        Aff_Entete(F,2,Entete(Intermediaire,2));
+        for (int i1 = 1; i1 <Entete(F,0)+1 ; ++i1) {
+            LireDir(Intermediaire,i1,buff);
+            EcrireDir(F,i1,buff);
         }
     }
-    }
-
     }
 
 

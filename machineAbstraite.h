@@ -32,7 +32,7 @@ typedef struct fichier  {
     int blocCourrent;
     FILE* file;
 } * FICHIER;
-
+FICHIER Intermediaire;
 BLOC buff , buffTmp;
 #define TAILLE_ENTETE sizeof(struct Tentete)
 
@@ -64,6 +64,6 @@ void Insertion (FICHIER F, char *cle);
 void Suppression(FICHIER f,char * cle);
 void AffichEntete(FICHIER f);
 void creationArticle(char * cle, char info[990], char taille[3], char efface, char Article[998]);
-
+void Reorganisation(FICHIER F);
 
 #endif //TP_FICHIERS_MACHINEABSTRAITE_H

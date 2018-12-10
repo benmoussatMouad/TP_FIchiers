@@ -9,7 +9,7 @@ int main() {
     int erreur = 1;
 
     FICHIER F = malloc(sizeof(FICHIER)); //allouer un espace memoire suffisant
-
+    Intermediaire=malloc(sizeof(FICHIER));
     do {
         printf("Entrez le nom du fichier :");
         gets(nomFichier);
@@ -26,18 +26,17 @@ int main() {
         }
 
     } while (erreur);
-
+    Ouvrir(Intermediaire,".\\INTERMEDIAIRE",'n');
     CLEAR;
 
     //***********Menu principale******************
     char OUT[1000];
-    puts("anaaa");
     char cle[5]; //Sert pour la lecture en entree
     int quit = 0;
     int trouv, bloc, pos;
 
     while (!quit) {
-        printf("Bienvenue dans le programme de gestion de ficheir\n\t\tQue voulez vous faire ?\n\n");
+        printf("\nBienvenue dans le programme de gestion de fichier\n\t\tQue voulez vous faire ?\n\n");
         printf("\t1.Rechercher une donne."
                "\n\t2.Inserer une donne."
                "\n\t3.Supprimer une donne."
@@ -48,8 +47,6 @@ int main() {
                "\n\tAutres. Fermer et sauvegarder.");
         printf("\n\nEntrez un choix : ");
         scanf(" %d", &inpuInt);
-        puts("BONJOUR !!");
-        printf("%d", inpuInt);
 
         //*********************************************
         switch (inpuInt) {
@@ -57,31 +54,30 @@ int main() {
                 CLEAR;
                 puts("Entrez la cle à chercher: ");
                 fflush(stdin);
-                puts("AVANT");
                 scanf(" %s", cle);
-                puts("APRES");
                 Recherche(F, cle, &trouv, &bloc, &pos);
                 if (trouv) {
-                    printf("La donne se trouve dans le bloc %d a la position %d\n.", bloc, pos);
+                    printf("\nLa donne se trouve dans le bloc %d a la position %d\n.", bloc, pos);
                 }
                 else {
-                    printf("La donne n'est pas trouve.\n");
+                    printf("\nLa donne n'est pas trouve.\n");
                 }
                 getch();
                 break;
             case 2:
                 CLEAR;
-                puts("Entrez la cle de la donne a inserer (4 car) : ");
+                puts("\nEntrez la cle de la donne a inserer (4 car) : ");
                 fflush(stdin);
-                puts("AVANT");
                 scanf(" %s", cle);
-                puts("APRES");
                 Insertion(F, cle);
+                if (Entete(F,3)<=2*Entete(F,2)){
+                    Reorganisation(F);
+                }
                 getch();
                 break;
             case 3:
                 CLEAR;
-                puts("Entrez la cle à supprimer : ");
+                puts("\nEntrez la cle à supprimer : ");
                 fflush(stdin);
                 scanf("%s", cle);
                 Suppression(F, cle);
@@ -89,15 +85,17 @@ int main() {
                 break;
             case 5:
                 CLEAR;
-                puts("Entrez le nombre du bloc à afficher :");
+                puts("\nEntrez le nombre du bloc à afficher :");
                 fflush(stdin);
                 scanf("%d", &inpuInt);
+                if (inpuInt<=Entete(F,0)){
                 LireDir(F, inpuInt, buff);
                 for (int i = 0; i < 999; ++i) {
                     OUT[i] = buff->Tab[i];
                 }
                 OUT[999] = '\0';
-                puts(OUT);
+                printf("\nLe bloc %d:",inpuInt);
+                puts(OUT);}else printf("\nle bloc demandé n'existe pas.");
                 getch();
                 break;
 
@@ -108,18 +106,22 @@ int main() {
             case 6:
                 for (int j = 1; j <Entete(F,0)+1 ; ++j) {
                     LireDir(F, j, buff);
-                    printf("Bloc %d :",j);
                     for (int k = 0; k < 999; ++k) {
                         OUT[k] = buff->Tab[k];
                     }
                     OUT[999] = '\0';
-                    puts(OUT);
+                    printf(" \n %d\\BLOC %d : %s",j,j,OUT);
+                    //puts(OUT);
                 }
                 getch();
                 break;
-
+            case 7:
+                Reorganisation(F);
+                getch();
+                break;
             default:
                 Fermer(F);
+                Fermer(Intermediaire);
                 quit = 1;
                 break;
         }
